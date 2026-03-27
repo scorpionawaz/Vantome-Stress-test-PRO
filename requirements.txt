@@ -1,0 +1,20 @@
+# --- Web Frameworks & Servers ---
+fastapi
+uvicorn
+flask
+gunicorn
+
+# --- Database & Environment ---
+motor
+pymongo
+python-dotenv
+pydantic
+
+
+
+# --- AI & LLM ---
+
+
+# --- Utilities ---
+requests
+protobuf
