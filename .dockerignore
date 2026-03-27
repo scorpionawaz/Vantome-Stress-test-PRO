@@ -1,0 +1,15 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.log
+.env
+.idea
+.vscode
+*.md
+COMPLETE_SUMMARY.md
+IMPROVEMENTS_SUMMARY.md
+METRICS_GUIDE.md
+QUICK_START.md
+SETUP_GUIDE.md

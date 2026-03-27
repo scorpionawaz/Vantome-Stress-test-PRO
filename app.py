@@ -22,12 +22,21 @@ stress_metrics = {
     "total_memory_mb": 0
 }
 
-# Configure logging with timestamps
+# Configure logging with timestamps and immediate flushing
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    force=True  # Force internal loggers to use this config
 )
 logger = logging.getLogger(__name__)
+
+# Ensure stdout is unbuffered if the env variable isn't set
+import sys
+if not hasattr(sys.stdout, 'reconfigure'): # Python < 3.7
+    pass 
+else:
+    sys.stdout.reconfigure(line_buffering=True)
+    sys.stderr.reconfigure(line_buffering=True)
 
 # ==========================================
 # HELPER FUNCTIONS
