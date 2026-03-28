@@ -94,7 +94,7 @@ def log_stress_event(event_type, details):
 # ROUTES
 # ==========================================
 
-@app.route('/')
+@app.route('/health')
 def health_check():
     """Health check endpoint"""
     return jsonify({
@@ -106,11 +106,15 @@ def health_check():
     }), 200
 
 
-@app.route('/ui')
+@app.route('/')
 def dashboard():
     """Serves the Chaos Dashboard UI"""
     return render_template('index.html')
 
+@app.route('/ui')
+def dashboardredner():
+    """Serves the Chaos Dashboard UI"""
+    return render_template('index.html')
 
 # ========== CPU STRESS ==========
 
