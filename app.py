@@ -41,6 +41,27 @@ def log_stress_event(event_type, details):
     timestamp = datetime.now().isoformat()
     logger.warning(f"🚨 [{event_type}] {details} - {timestamp}")
 
+# Custom Error Handlers for Chaos Testing
+@app.errorhandler(ZeroDivisionError)
+def handle_zero_division(e):
+    logger.error(f"💥 Handled ZeroDivisionError exception: {e}")
+    return jsonify({
+        "status": "error",
+        "error": "ZeroDivisionError",
+        "message": "Simulated runtime crash (ZeroDivisionError)",
+        "timestamp": datetime.now().isoformat()
+    }), 500
+
+@app.errorhandler(500)
+def handle_500_error(e):
+    logger.error(f"💥 Handled InternalServerError exception: {e}")
+    return jsonify({
+        "status": "error",
+        "error": "InternalServerError",
+        "message": str(e) or "Simulated internal server error",
+        "timestamp": datetime.now().isoformat()
+    }), 500
+
 # ROUTES
 @app.route('/health')
 def health_check():
@@ -91,7 +112,7 @@ def get_metrics():
         "memory": {
             "total_allocated_mb": round(total_mem, 2),
             "leak_chunks": len(memory_leak_storage),
-            "max_per_chunk_mb": 100
+            "max_per_chunk_mb": int(os.getenv("MEMORY_LEAK_MB", "50"))
         },
         "events": {
             "cpu_spike_count": stress_metrics["cpu_spike_count"],
@@ -179,42 +200,41 @@ def burn_cpu_long():
 # MEMORY STRESS
 @app.route('/simulate/memory-leak')
 def leak_memory():
-    logger.warning("💾 MEMORY LEAK INITIATED - allocating 100MB...")
+    alloc_mb = int(os.getenv("MEMORY_LEAK_MB", "50"))
+    logger.warning(f"💾 MEMORY LEAK INITIATED - allocating {alloc_mb}MB...")
     
-    def allocate_memory():
-        try:
-            chunk = bytearray(100 * 1024 * 1024)
-            memory_leak_storage.append(chunk)
-            current_total = sum(len(c) for c in memory_leak_storage) / (1024 * 1024)
-            logger.warning(f"📈 Memory consumed: {current_total:.1f}MB across {len(memory_leak_storage)} chunks")
-        except MemoryError:
-            logger.error("💥 OUT OF MEMORY ERROR - Container will crash!")
-    
-    thread = threading.Thread(target=allocate_memory, daemon=True)
-    thread.start()
-    
-    stress_metrics["memory_leak_count"] += 1
-    current_total = sum(len(c) for c in memory_leak_storage) / (1024 * 1024)
-    
-    return jsonify({
-        "status": "memory_leaking",
-        "message": "100MB allocated and retained",
-        "total_memory_mb": round(current_total, 2),
-        "leak_count": len(memory_leak_storage),
-        "timestamp": datetime.now().isoformat()
-    }), 200
+    try:
+        chunk = bytearray(alloc_mb * 1024 * 1024)
+        memory_leak_storage.append(chunk)
+        stress_metrics["memory_leak_count"] += 1
+        current_total = sum(len(c) for c in memory_leak_storage) / (1024 * 1024)
+        logger.warning(f"📈 Memory consumed: {current_total:.1f}MB across {len(memory_leak_storage)} chunks")
+        return jsonify({
+            "status": "memory_leaking",
+            "message": f"{alloc_mb}MB allocated and retained",
+            "total_memory_mb": round(current_total, 2),
+            "leak_count": len(memory_leak_storage),
+            "timestamp": datetime.now().isoformat()
+        }), 200
+    except MemoryError:
+        logger.error("💥 OUT OF MEMORY ERROR - Container memory limit reached!")
+        return jsonify({
+            "status": "oom_error",
+            "message": "Out of memory error when allocating chunk"
+        }), 500
 
 @app.route('/simulate/memory-spike')
 def memory_spike():
-    logger.warning("🔴 AGGRESSIVE MEMORY SPIKE - 500MB allocation")
+    alloc_mb = int(os.getenv("MEMORY_SPIKE_MB", "200"))
+    logger.warning(f"🔴 AGGRESSIVE MEMORY SPIKE - {alloc_mb}MB allocation")
     try:
-        chunk = bytearray(500 * 1024 * 1024)
+        chunk = bytearray(alloc_mb * 1024 * 1024)
         memory_leak_storage.append(chunk)
         stress_metrics["memory_leak_count"] += 1
         current_total = sum(len(c) for c in memory_leak_storage) / (1024 * 1024)
         return jsonify({
             "status": "memory_spike",
-            "allocated_mb": 500,
+            "allocated_mb": alloc_mb,
             "total_memory_mb": round(current_total, 2),
             "timestamp": datetime.now().isoformat()
         }), 200
@@ -222,7 +242,7 @@ def memory_spike():
         logger.error("💥 OUT OF MEMORY - System out of memory!")
         return jsonify({
             "status": "oom_error",
-            "message": "Failed to allocate 500MB - system out of memory"
+            "message": f"Failed to allocate {alloc_mb}MB - system out of memory"
         }), 500
 
 @app.route('/simulate/memory-leak/clear')
@@ -309,7 +329,7 @@ def full_chaos():
     
     return jsonify({
         "status": "full_chaos_initiated",
-        "components": ["cpu_burn", "memory_leak_100mb", "background_timeout"],
+        "components": ["cpu_burn", "memory_leak", "background_timeout"],
         "message": "System under simultaneous multi-vector stress",
         "timestamp": datetime.now().isoformat()
     }), 200
