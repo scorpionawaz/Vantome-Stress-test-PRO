@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vantome Pro | Chaos Engineering Dashboard</title>
+    <title>Bantam Pro | Chaos Engineering Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -43,9 +43,17 @@
         .header h1 {
             font-size: 2.2em;
             color: var(--primary);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             font-weight: 800;
             letter-spacing: -0.5px;
+        }
+
+        .subtitle-buildathon {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 4px;
+            margin-bottom: 8px;
         }
 
         .header p {
@@ -322,7 +330,8 @@
 </head>
 <body>
     <div class="header">
-        <h1>⚡ VANTOME PRO</h1>
+        <h1>⚡ BANTAM PRO</h1>
+        <div class="subtitle-buildathon">Vantome pro for startup Buildathon 2026</div>
         <p>Chaos Engineering & Resilience Analysis Dashboard</p>
         <div class="performance-indicator">
             <div id="rating-badge" class="perf-badge perf-excellent">
@@ -397,84 +406,98 @@
                 <div class="card">
                     <div>
                         <div class="card-emoji">🕐</div>
-                        <h3>Timeout Hang</h3>
-                        <p>Simulates database deadlock with 15 second request delay.</p>
+                        <h3>Timeout</h3>
+                        <p>Simulates a 15-second response hang (DB deadlock).</p>
                     </div>
-                    <button class="btn-timeout" onclick="runTest('/simulate/timeout', 'Timeout Hang')">Simulate Timeout</button>
+                    <button class="btn-timeout" onclick="runTest('/simulate/timeout', 'Timeout (15s)')">Simulate Timeout</button>
                 </div>
                 <div class="card">
                     <div>
                         <div class="card-emoji">🌊</div>
                         <h3>Cascading Timeouts</h3>
-                        <p>Spawns 20 concurrent hanging requests to exhaust pools.</p>
+                        <p>Spawns 20 concurrent hanging requests.</p>
                     </div>
                     <button class="btn-timeout" onclick="runTest('/simulate/timeout-cascade', 'Cascading Timeouts')">Cascade Timeouts</button>
                 </div>
             </div>
         </div>
 
-        <!-- CRASH TESTS -->
+        <!-- ERROR & CRASH TESTS -->
         <div class="section">
-            <h2 class="section-title">💥 Error & Recovery Tests</h2>
+            <h2 class="section-title">💥 Error & Crash Tests</h2>
             <div class="grid">
                 <div class="card">
                     <div>
                         <div class="card-emoji">💥</div>
-                        <h3>Force Runtime Crash</h3>
-                        <p>Triggers a 500 ZeroDivisionError to test exception handling.</p>
+                        <h3>Runtime Crash</h3>
+                        <p>Forces HTTP 500 ZeroDivisionError exception.</p>
                     </div>
-                    <button class="btn-crash" onclick="runTest('/simulate/crash', 'Runtime Crash')">Force 500 Error</button>
+                    <button class="btn-crash" onclick="runTest('/simulate/crash', 'Runtime Crash')">Force Crash</button>
                 </div>
                 <div class="card">
                     <div>
                         <div class="card-emoji">🔁</div>
                         <h3>Crash Series</h3>
-                        <p>Executes sequential background crashes to test stability.</p>
+                        <p>Triggers multiple sequential 500 errors.</p>
                     </div>
                     <button class="btn-crash" onclick="runTest('/simulate/crash-series', 'Crash Series')">Trigger Crash Series</button>
                 </div>
             </div>
         </div>
 
-        <!-- METRICS DISPLAY -->
+        <!-- FULL CHAOS -->
+        <div class="section">
+            <h2 class="section-title">☣️ Full Chaos Scenario</h2>
+            <div class="grid">
+                <div class="card" style="grid-column: 1 / -1; background: #faf5ff; border-color: #d8b4fe;">
+                    <div>
+                        <div class="card-emoji">🚨</div>
+                        <h3>Full Chaos Mode</h3>
+                        <p>Triggers simultaneous CPU stress, memory leaks, and cascading timeouts to simulate total system failure.</p>
+                    </div>
+                    <button class="btn-chaos" onclick="runTest('/simulate/full-chaos', 'Full Chaos Mode')">🚨 Launch Full Chaos 🚨</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIVE METRICS -->
         <div class="metrics-section">
-            <h2>📊 Live Metrics & System Analysis</h2>
-            
+            <h2>📊 Live Metrics & Performance Analysis</h2>
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-label">Memory Allocated</div>
-                    <div class="metric-value" id="val-memory">0 MB</div>
+                    <div class="metric-value" id="metric-memory">0 MB</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">Active Leaks</div>
-                    <div class="metric-value" id="val-leaks">0</div>
+                    <div class="metric-value" id="metric-leaks">0</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">CPU Spikes</div>
-                    <div class="metric-value" id="val-cpu-spikes">0</div>
+                    <div class="metric-value" id="metric-cpu">0</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">Crash Events</div>
-                    <div class="metric-value" id="val-crashes">0</div>
+                    <div class="metric-value" id="metric-crashes">0</div>
                 </div>
             </div>
 
             <div class="performance-metrics">
-                <div class="perf-metric excellent" id="card-latency">
+                <div class="perf-metric excellent" id="perf-latency-card">
                     <div class="perf-label">Avg Response Time</div>
-                    <div class="perf-value" id="val-latency">0 ms</div>
+                    <div class="perf-value" id="perf-latency">0 ms</div>
                 </div>
-                <div class="perf-metric excellent" id="card-recovery">
+                <div class="perf-metric excellent" id="perf-recovery-card">
                     <div class="perf-label">Crash Recovery Rate</div>
-                    <div class="perf-value" id="val-recovery">100 %</div>
+                    <div class="perf-value" id="perf-recovery">100 %</div>
                 </div>
-                <div class="perf-metric excellent" id="card-load">
+                <div class="perf-metric excellent" id="perf-load-card">
                     <div class="perf-label">System Load Index</div>
-                    <div class="perf-value" id="val-load">0 %</div>
+                    <div class="perf-value" id="perf-load">0 %</div>
                 </div>
-                <div class="perf-metric excellent" id="card-stability">
+                <div class="perf-metric excellent" id="perf-stability-card">
                     <div class="perf-label">Stability Score</div>
-                    <div class="perf-value" id="val-stability">100 %</div>
+                    <div class="perf-value" id="perf-stability">100 %</div>
                 </div>
             </div>
 
@@ -482,7 +505,7 @@
                 <div class="log-entry">
                     <span class="log-time">[System]</span>
                     <span class="log-status log-success">✓</span>
-                    <span>Dashboard initialized and monitoring active.</span>
+                    <span>Dashboard initialized. Waiting for test execution...</span>
                 </div>
             </div>
         </div>
@@ -493,56 +516,76 @@
         let totalRequests = 0;
         let successfulRequests = 0;
         let crashCount = 0;
-        let cpuSpikeCount = 0;
-        let memoryLeaks = 0;
-        let allocatedMB = 0;
         let responseTimes = [];
 
-        // Uptime counter
-        setInterval(() => {
+        function updateUptime() {
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const mins = Math.floor(elapsed / 60);
-            const secs = elapsed % 60;
-            document.getElementById('uptime').innerText = `${mins}m ${secs}s`;
-        }, 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('uptime').textContent = `${minutes}m ${seconds}s`;
+        }
+        setInterval(updateUptime, 1000);
 
-        function logEvent(message, status = 'success') {
+        function addLogEntry(endpoint, status, statusCode, duration, message) {
             const logContainer = document.getElementById('response-log');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            
             const now = new Date();
             const timeStr = now.toTimeString().split(' ')[0];
             
-            const statusClass = status === 'success' ? 'log-success' : (status === 'error' ? 'log-error' : 'log-warning');
-            const icon = status === 'success' ? '✓' : (status === 'error' ? '✗' : '●');
-
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const isSuccess = statusCode >= 200 && statusCode < 300;
+            const statusClass = isSuccess ? 'log-success' : 'log-error';
+            const icon = isSuccess ? '✓' : '✗';
+            
             entry.innerHTML = `
                 <span class="log-time">[${timeStr}]</span>
                 <span class="log-status ${statusClass}">${icon}</span>
-                <span>${message}</span>
+                <span>${endpoint} - Status: ${statusCode} in ${duration}ms (${message})</span>
             `;
-
+            
             logContainer.prepend(entry);
         }
 
-        async function updateMetrics() {
+        async function runTest(endpoint, name) {
+            const reqStart = Date.now();
+            totalRequests++;
+            try {
+                const response = await fetch(endpoint);
+                const duration = Date.now() - reqStart;
+                responseTimes.push(duration);
+                if (responseTimes.length > 20) responseTimes.shift();
+
+                const data = await response.json().catch(() => ({ status: 'error' }));
+
+                if (response.ok) {
+                    successfulRequests++;
+                    addLogEntry(endpoint, 'SUCCESS', response.status, duration, name);
+                } else {
+                    crashCount++;
+                    addLogEntry(endpoint, 'ERROR', response.status, duration, data.message || name);
+                }
+            } catch (err) {
+                const duration = Date.now() - reqStart;
+                crashCount++;
+                addLogEntry(endpoint, 'FAILED', 500, duration, err.message);
+            }
+            fetchMetrics();
+        }
+
+        async function fetchMetrics() {
             try {
                 const res = await fetch('/health');
-                if (res.ok) {
-                    const data = await res.json();
-                    memoryLeaks = data.memory_leaks_active || memoryLeaks;
-                    document.getElementById('val-leaks').innerText = memoryLeaks;
-                }
-            } catch (e) {
-                // Background update fallback
-            }
+                const data = await res.json();
+                
+                document.getElementById('metric-leaks').textContent = data.memory_leaks_active || 0;
+                document.getElementById('metric-cpu').textContent = data.active_processes || 0;
+            } catch (e) {}
 
-            document.getElementById('val-memory').innerText = `${allocatedMB.toFixed(1)} MB`;
-            document.getElementById('val-cpu-spikes').innerText = cpuSpikeCount;
-            document.getElementById('val-crashes').innerText = crashCount;
+            calculatePerformance();
+        }
 
-            // Calculations
+        function calculatePerformance() {
             const avgLatency = responseTimes.length > 0 
                 ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length) 
                 : 0;
@@ -551,68 +594,36 @@
                 ? Math.round((successfulRequests / totalRequests) * 100) 
                 : 100;
 
-            const loadIndex = Math.min(100, Math.round((allocatedMB / 40) + (avgLatency / 50) + (crashCount * 10)));
-            const stabilityScore = Math.max(0, 100 - Math.round((crashCount * 15) + (allocatedMB / 20) + (avgLatency > 500 ? 30 : 0)));
+            const systemLoad = Math.min(100, Math.round((avgLatency / 500) * 50 + (crashCount * 10)));
+            const stability = Math.max(0, Math.min(100, 100 - (avgLatency > 200 ? 20 : 0) - (crashCount * 15)));
 
-            document.getElementById('val-latency').innerText = `${avgLatency} ms`;
-            document.getElementById('val-recovery').innerText = `${recoveryRate} %`;
-            document.getElementById('val-load').innerText = `${loadIndex} %`;
-            document.getElementById('val-stability').innerText = `${stabilityScore} %`;
+            document.getElementById('perf-latency').textContent = `${avgLatency} ms`;
+            document.getElementById('perf-recovery').textContent = `${recoveryRate} %`;
+            document.getElementById('perf-load').textContent = `${systemLoad} %`;
+            document.getElementById('perf-stability').textContent = `${stability} %`;
 
-            // Update performance rating
-            let rating = 'EXCELLENT';
-            let badgeClass = 'perf-excellent';
-
-            if (stabilityScore < 30 || recoveryRate < 50 || loadIndex > 85) {
-                rating = 'CRITICAL';
-                badgeClass = 'perf-critical';
-            } else if (stabilityScore < 55 || recoveryRate < 75 || loadIndex > 65) {
-                rating = 'POOR';
-                badgeClass = 'perf-poor';
-            } else if (stabilityScore < 75 || loadIndex > 45) {
-                rating = 'FAIR';
-                badgeClass = 'perf-fair';
-            } else if (stabilityScore < 90 || loadIndex > 25) {
-                rating = 'GOOD';
-                badgeClass = 'perf-good';
+            const ratingBadge = document.getElementById('rating-badge');
+            const ratingText = document.getElementById('rating-text');
+            
+            if (stability >= 85) {
+                ratingBadge.className = 'perf-badge perf-excellent';
+                ratingText.textContent = 'EXCELLENT';
+            } else if (stability >= 70) {
+                ratingBadge.className = 'perf-badge perf-good';
+                ratingText.textContent = 'GOOD';
+            } else if (stability >= 50) {
+                ratingBadge.className = 'perf-badge perf-fair';
+                ratingText.textContent = 'FAIR';
+            } else if (stability >= 25) {
+                ratingBadge.className = 'perf-badge perf-poor';
+                ratingText.textContent = 'POOR';
+            } else {
+                ratingBadge.className = 'perf-badge perf-critical';
+                ratingText.textContent = 'CRITICAL';
             }
-
-            const badge = document.getElementById('rating-badge');
-            badge.className = `perf-badge ${badgeClass}`;
-            document.getElementById('rating-text').innerText = rating;
         }
 
-        async function runTest(endpoint, name) {
-            totalRequests++;
-            const t0 = performance.now();
-            logEvent(`Initiated test: ${name}...`, 'warning');
-
-            if (endpoint.includes('cpu')) cpuSpikeCount++;
-            if (endpoint.includes('memory-leak')) allocatedMB += 100;
-            if (endpoint.includes('memory-spike')) allocatedMB += 500;
-            if (endpoint.includes('clear')) { allocatedMB = 0; memoryLeaks = 0; }
-
-            try {
-                const res = await fetch(endpoint);
-                const duration = Math.round(performance.now() - t0);
-                responseTimes.push(duration);
-                if (responseTimes.length > 30) responseTimes.shift();
-
-                if (res.ok) {
-                    successfulRequests++;
-                    logEvent(`${name} completed successfully (${duration}ms) - HTTP ${res.status}`, 'success');
-                } else {
-                    crashCount++;
-                    logEvent(`${name} failed (${duration}ms) - HTTP ${res.status}`, 'error');
-                }
-            } catch (err) {
-                const duration = Math.round(performance.now() - t0);
-                crashCount++;
-                logEvent(`${name} failed with network error (${duration}ms)`, 'error');
-            }
-
-            updateMetrics();
-        }
+        setInterval(fetchMetrics, 3000);
     </script>
 </body>
 </html>
