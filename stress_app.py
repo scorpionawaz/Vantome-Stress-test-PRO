@@ -226,7 +226,18 @@ def crash_series():
     logger.error("🔁 CRASH SERIES - will fail soon")
     log_stress_event("CRASH_SERIES", "Initiating sequential crashes")
     stress_metrics["crash_count"] += 1
-    return str(1 / 0)
+    def delayed_crash():
+        time.sleep(2)
+        _ = 1 / 0
+    for _ in range(3):
+        t = threading.Thread(target=delayed_crash, daemon=True)
+        t.start()
+        active_stress_processes.append(t)
+    return jsonify({
+        "status": "crash_series_initiated",
+        "message": "Sequential crashes triggered",
+        "timestamp": datetime.now().isoformat()
+    }), 200
 
 @app.route('/simulate/full-chaos')
 def full_chaos():
